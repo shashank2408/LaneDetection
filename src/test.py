@@ -3,7 +3,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-folderPath = "Dataset/scripts/last_trial/right_folder"
+folderPath = "../data/Dataset/scripts/last_trial/right_folder"
 files = [fn for fn in os.listdir(os.path.join(".",folderPath)) if fn.endswith('jpg')]
 f, axarr = plt.subplots(2,2)
 
@@ -15,7 +15,7 @@ def perspective(img, src, dst):
 	rows,cols,ch = img.shape
 	cropped = img[int(rows/2):int(rows),:]
 	h,s,v = cv2.split(cropped)
-	edgemap = cv2.Canny(s,200,100)
+	edgemap = cv2.Canny(img,150,100)
 	rows,cols = s.shape
 	src_pts = np.array([[10,120], [600,10],[900,120 ],[1200,120]], dtype = "float32")
 	dst_pts = np.array([[10,cols],[10,0],[1000,0],[1000,cols]], dtype = "float32")
@@ -133,13 +133,16 @@ for i in range(1,50):
 	edegemap, dst = perspective(img,src_pts,dst_pts)
 
 	# color_fr = 
-
+	blur = cv2.GaussianBlur(img,(5,5),0)
+	bluredge, awwe = perspective(blur,src_pts,dst_pts)
 
 
 
 	cv2.imshow('edegemap',edegemap)
-	# cv2.imshow('result',res)
-	cv2.imshow('lines',dst)
+	cv2.imshow('blur',blur)
+	cv2.imshow('bluredge',bluredge)
+
+	# cv2.imshow('lines',dst)
 	cv2.waitKey(0)
 # plt.show()
 
