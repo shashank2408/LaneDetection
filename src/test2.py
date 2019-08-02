@@ -2,6 +2,10 @@ import cv2
 import os 
 import numpy as np
 import itertools as it 
+from PIL import Image, ImageDraw
+from pylsd.lsd import lsd
+import matplotlib.pyplot as plt
+
 
 folderPath = "../data/Dataset/scripts/last_trial/right_folder"
 files = [fn for fn in os.listdir(os.path.join(".",folderPath)) if fn.endswith('jpg')]
@@ -70,7 +74,7 @@ def cannyEdge():
     edge = cv2.Canny(image = image, 
         threshold1 = minT, 
         threshold2 = maxT)
-
+    print(edge)
     cv2.imshow(winname = "edges", mat = edge)
 
 
@@ -149,8 +153,15 @@ def createWindowForEdge():
     cv2.namedWindow(winname = "edges", flags = cv2.WINDOW_NORMAL)
     cv2.createTrackbar("minT", "edges", minT, 255, adjustMinT)
     cv2.createTrackbar("maxT", "edges", maxT, 255, adjustMaxT)
-    cannyEdge()
 
+
+
+def lineSegementDetect():
+    global image
+    lsd = cv2.createLineSegmentDetector(0)
+    lines = cv2.detect(image)
+    cv2.drawSegments(image,lines)
+    cv2.imshow("lines",image)
 
 def extrapolateLines():
     global image 
@@ -160,42 +171,63 @@ def extrapolateLines():
     cv2.line(image,VP,tuple(endPoints[0]),(0,0,255),4)
     cv2.line(image,VP,tuple(endPoints[1]),(0,0,255),4)
 
-
-
-
 def preProcess():
     global image 
     im_bw = cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
     image = cv2.equalizeHist(im_bw)
-    image = cv2.GaussianBlur(image,(7,7),0)
-    cv2.imshow("img", image)
-
+    image = cv2.GaussianBlur(image,(3,3),0)
+    image = cv2.bilateralFilter(image,9,50,50)
+    # cv2.imshow("img", image)
 # def computeDerivatives 
+
+
+def drawLineSegments(file):
+    global image
+    rows,cols = image.shape
+    # gray = np.asarray(image.convert('L'))
+    # gray = cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
+    lines = lsd(image)
+    # draw = ImageDraw.Draw(image)
+    if lines is not None:
+        for line in lines:
+            # print(line)
+            pt1 = [int(line[0]), int(line[1])]
+            pt2 = [int(line[2]), int(line[3])]
+            # width = lines[i, 4]
+            dx = int(line[2]) - int(line[0])
+            dy = int(line[3]) - int(line[1])
+            dx = dx
+            dy = dy
+            length = np.sqrt(dx*dx + dy*dy)
+            if length > 50:
+                print(length)
+                cv2.line(image,tuple(pt1), tuple(pt2),(0,0,255),4)
+    cv2.imshow("img", image)
 
 
 
 def main():
     global image
 
+    # createWindowForEdge()
     for i in range(1,20):
-        image = cv2.imread(os.path.join(folderPath,files[i]))
+        file = os.path.join(folderPath,files[i])
+        image = cv2.imread(file)
         # image = cv2.GaussianBlur(image,(5,5),0)
         # res, res_norm = removeShadows()
         # cv2.imshow('res',res)
         # cv2.imshow('res_norm',res_norm)
         preProcess()
-        # createWindowForEdge()
+        # Sobel()
+        # cannyEdge()
         # image = cv2.addWeighted(image,0.6,res,0.4,0)
         # cv2.imshow('fin',fin)
         # drawContours()
         # extrapolateLines()
+        # lineSegementDetect()
         # hough_transform(image)
 
-
-
-
-
-
+        drawLineSegments(file)
         cv2.waitKey(delay = 0)
 
 
