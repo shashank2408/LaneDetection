@@ -7,6 +7,8 @@ folderPath = "../data/Dataset/scripts/last_trial/right_folder"
 files = [fn for fn in os.listdir(os.path.join(".",folderPath)) if fn.endswith('jpg')]
 
 
+#http://ppniv14.irccyn.ec-nantes.fr/material/session2/Seo/presentation.pdf
+
 def getMean(channel):
     rows,cols =channel.shape
     cropped = channel[int(rows-rows/4):int(rows),:]
@@ -167,6 +169,9 @@ def preProcess():
     image = cv2.equalizeHist(im_bw)
     image = cv2.GaussianBlur(image,(7,7),0)
     cv2.imshow("img", image)
+
+# def computeDerivatives 
+
 
 
 def main():
