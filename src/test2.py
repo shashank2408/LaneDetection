@@ -202,6 +202,7 @@ def drawLineSegments(file):
             if length > 50:
                 print(length)
                 cv2.line(image,tuple(pt1), tuple(pt2),(0,0,255),4)
+
     cv2.imshow("img", image)
 
 
