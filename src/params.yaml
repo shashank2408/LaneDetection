@@ -1,0 +1,3 @@
+camera_topic: "/zed/zed_node/rgb_raw/image_raw_color"
+odom_topic: "/vesc/odom"
+
