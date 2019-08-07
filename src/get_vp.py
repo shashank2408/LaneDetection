@@ -1,6 +1,5 @@
 """
-Methods to get vanishing points in an image. 
-
+Class to get vanishing points in an image. 
 """
 import cv2
 import os 
@@ -12,7 +11,7 @@ import matplotlib.pyplot as plt
 import itertools
 
 
-folderPath = "../data/Dataset/scripts/last_trial/right_folder"
+folderPath = "../data/Dataset/scripts/first_trial/right_folder"
 files = [fn for fn in os.listdir(os.path.join(".",folderPath)) if fn.endswith('jpg')]
 
 class GetVanishingPoint:
@@ -48,17 +47,19 @@ class GetVanishingPoint:
         return False
 
 
-    def drawLineSegments(self,drawLines=False):
+    def drawLineSegments(self,visualize=False):
         lines = lsd(self.image)
         lines = self.removeFromBoxOfDoom(lines)
         lines = list(filter(lambda line: self.lineThresh(line,self.thresholdLine),lines))
         # # lineFilter
-        if drawLines:
-            for line in lines:
-                cv2.line(self.origImage,tuple([int(line[0]),int(line[1])]), \
-                    tuple([int(line[2]),int(line[3])]),(0,0,255),4)
+        if visualize:
+            drawLines(lines)
         return lines
 
+    def drawLines(self,lines):
+        for line in lines:
+            cv2.line(self.origImage,tuple([int(line[0]),int(line[1])]), \
+                tuple([int(line[2]),int(line[3])]),(0,0,255),4)
 
     def findBestCell(self,points,grid_size,vis_grid=False):
 
@@ -157,7 +158,7 @@ class GetVanishingPoint:
         if D != 0:
             x = Dx / D
             y = Dy / D
-            return x,y
+            return (x,y)
         else:
             return False
 
@@ -191,11 +192,31 @@ class GetVanishingPoint:
         intersections = self.findIntersections(lines)
         intersections = list(filter(lambda point: self.isPointInImage(point),intersections))
         self.drawIntersections(intersections)
-        best_cell = self.findBestCell(intersections,100)
-        self.visualizePath(best_cell)
-
+        # best_cell = self.findBestCell(intersections,100)
+        # self.visualizePath(best_cell)
+        # self.filterDistances(lines,intersections)
+        best_point = self.Ransac(lines,intersections)
+        self.visualizePath(best_point)
         cv2.imshow("img", self.origImage)
 
+    def Ransac(self,lines,intersections):
+        
+        # Get the number of lines/per point which are within the threshold  
+
+        nums = list(map(lambda p : self.getLineswithinThresh(lines,p), intersections))
+        max_index = nums.index(max(nums))
+        print(intersections[max_index])
+        return intersections[max_index]
+
+
+    def getLineswithinThresh(self, lines, point,thresh=10):
+        distances = []
+        for line in lines: 
+            pt1 = np.array([int(line[0]), int(line[1])])
+            pt2 = np.array([int(line[2]), int(line[3])])
+            distances.append(np.linalg.norm(np.cross(pt2-pt1, pt1-np.array(point)))/np.linalg.norm(pt2-pt1))
+        numLines = len(list(filter(lambda d : d <thresh, distances)))
+        return numLines
 
 
 def main():
@@ -203,14 +224,12 @@ def main():
 
     Vp = GetVanishingPoint()
 
-
     for i in range(1,100):
         file = os.path.join(folderPath,files[i])
         image = cv2.imread(file)
         Vp.setImage(image)
         Vp.run()
         cv2.waitKey(delay = 0)
-
 
 if __name__ == "__main__":
     main()
