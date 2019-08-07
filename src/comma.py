@@ -12,6 +12,15 @@ eon_dcam_intrinsics = np.array([
 
 
 
+# device/mesh : x->forward, y-> right, z->down
+# view : x->right, y->down, z->forward
+device_frame_from_view_frame = np.array([
+  [ 0.,  0.,  1.],
+  [ 1.,  0.,  0.],
+  [ 0.,  1.,  0.]
+])
+view_frame_from_device_frame = device_frame_from_view_frame.T
+
 
 INPUTS_NEEDED = 100
 
@@ -34,9 +43,8 @@ class CenterTracker:
     twist = data.twist.twist.linear
     twist = np.array([twist.x,twist.y,twist.z])
     if not twist[0] == 0:
-      vp_new = eon_dcam_intrinsics.dot(twist.T)
+      vp_new = eon_dcam_intrinsics.dot(view_frame_from_device_frame.dot(twist))
       vp_new = vp_new[:2]/vp_new[2]
-      print(vp_new)
       self.vps.append(vp_new)
       self.vp = np.mean(self.vps[-INPUTS_NEEDED:],axis=0)
     self.drawVp()
