@@ -33,8 +33,8 @@ class CenterTracker:
   def odomCallback(self,data):
     twist = data.twist.twist.linear
     twist = np.array([twist.x,twist.y,twist.z])
-    if not twist[0] == 0:
-      vp_new = eon_dcam_intrinsics.dot(twist.T)
+    if not twist[0] == 0.0:
+      vp_new = eon_dcam_intrinsics.dot(twist)
       vp_new = vp_new[:2]/vp_new[2]
       print(vp_new)
       self.vps.append(vp_new)
@@ -44,7 +44,7 @@ class CenterTracker:
   def drawVp(self):
     cols,rows,ch = self.image.shape
     cv2.rectangle(self.image,(int(rows/4),int(cols/4)),(int(3/4*rows), (int(3/4*cols))),(170,200,255),4)
-    if not np.isnan(self.vp).any()
+    if not np.isnan(self.vp).any():
       cv2.circle(self.image,tuple(int(self.vp[0],int(self.vp[1]))),5,(170,200,255), -11)
     cv2.imshow("Image", self.image)
 
