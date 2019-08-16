@@ -52,9 +52,10 @@ class CenterTracker:
   def drawVp(self):
     cols,rows,ch = self.image.shape
     cv2.rectangle(self.image,(int(rows/4),int(cols/4)),(int(3/4*rows), (int(3/4*cols))),(170,200,255),4)
-    if not np.isnan(self.vp).any()
-      cv2.circle(self.image,tuple(int(self.vp[0],int(self.vp[1]))),5,(170,200,255), -11)
+    if not np.isnan(self.vp).any():
+      cv2.circle(self.image,tuple([int(self.vp[0]),int(self.vp[1])]),5,(170,200,255), -11)
     cv2.imshow("Image", self.image)
+    cv2.waitKey(100)
 
 
 
